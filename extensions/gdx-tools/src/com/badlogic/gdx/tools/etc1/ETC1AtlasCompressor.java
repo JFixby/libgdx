@@ -104,7 +104,6 @@ public class ETC1AtlasCompressor {
 		String atlasFilePath = null;
 		String outputDir = null;
 		switch (args.length) {
-
 		case 1:
 			atlasFilePath = args[0];
 			break;
