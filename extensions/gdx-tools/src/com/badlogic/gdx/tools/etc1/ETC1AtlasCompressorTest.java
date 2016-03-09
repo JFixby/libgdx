@@ -22,6 +22,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -61,13 +62,17 @@ public class ETC1AtlasCompressorTest implements ApplicationListener {
 		String regularAtlasOutputDir = regularAtlasFolder.path();
 		String etc1AtlasOutputDir = etc1AtlasFolder.path();
 
-		prepareTestAtlas(pngInputDir, regularAtlasOutputDir, outputAtlasFilename);
-		prepareTestAtlas(pngInputDir, etc1AtlasOutputDir, outputAtlasFilename);
+		boolean PACK = !true;
+
+		if (PACK) {
+			prepareTestAtlas(pngInputDir, regularAtlasOutputDir, outputAtlasFilename);
+			prepareTestAtlas(pngInputDir, etc1AtlasOutputDir, outputAtlasFilename);
+		}
 
 		String regularAtlasFilePathString = regularAtlasFolder.child(outputAtlasFilename).path();
 		String etc1AtlasFilePathString = etc1AtlasFolder.child(outputAtlasFilename).path();
 
-		boolean COMPRESS = true;
+		boolean COMPRESS = !true;
 
 		if (COMPRESS) {
 			ETC1AtlasCompressorSettings settings = ETC1AtlasCompressor.newCompressionSettings();
@@ -90,8 +95,8 @@ public class ETC1AtlasCompressorTest implements ApplicationListener {
 
 		TexturePacker.Settings atlasSettings = new TexturePacker.Settings();
 		atlasSettings.debug = true;
-		atlasSettings.maxWidth = 512;
-		atlasSettings.maxHeight = 256;
+		atlasSettings.maxWidth = 1024;
+		atlasSettings.maxHeight = 1024;
 		atlasSettings.format = Format.RGBA8888;
 
 		TexturePacker.process(atlasSettings, pngInputDir, atlasOutputDir, outputAtlasFilename);
@@ -121,12 +126,18 @@ public class ETC1AtlasCompressorTest implements ApplicationListener {
 
 	public void create () {
 		batch = new SpriteBatch();
-
+		long start = System.currentTimeMillis();
 		regularAtlas = new TextureAtlas(this.regularAtlasPathFile);
 		regularSprites = regularAtlas.createSprites();
+		long end = System.currentTimeMillis() - start;
 
+		log("regular atlas", end);
+		start = System.currentTimeMillis();
 		etc1Atlas = new TextureAtlas(this.etc1AtlasPathFile);
 		etc1Sprites = etc1Atlas.createSprites();
+		end = System.currentTimeMillis() - start;
+		log("etc1 atlas", end);
+
 		float x = 0;
 		float y = 0;
 		for (int i = 0; i < regularSprites.size; i++) {
@@ -145,18 +156,36 @@ public class ETC1AtlasCompressorTest implements ApplicationListener {
 
 	}
 
+	boolean renderRegular = true;
+	boolean renderETC1 = !true;
+
+	FPSLogger fps = new FPSLogger();
+
 	public void render () {
+
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		int x = 20, y = 20;
-		batch.begin();
-		for (Sprite sprite : regularSprites) {
-			sprite.draw(batch);
+		if (renderRegular) {
+			batch.begin();
+			renderTest(this.regularSprites);
+			batch.end();
 		}
-		for (Sprite sprite : etc1Sprites) {
-			sprite.draw(batch);
+		if (renderETC1) {
+			batch.begin();
+			renderTest(this.regularSprites);
+			batch.end();
 		}
-		batch.end();
+		fps.log();
+	}
+
+	int WEIGHT = 300;
+
+	private void renderTest (final Array<Sprite> sprites) {
+		for (int K = 0; K < WEIGHT; K++) {
+			for (final Sprite sprite : sprites) {
+				sprite.draw(batch);
+			}
+		}
 	}
 
 	public void resize (int width, int height) {
