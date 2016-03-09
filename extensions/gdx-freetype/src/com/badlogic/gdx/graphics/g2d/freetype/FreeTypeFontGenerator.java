@@ -345,6 +345,7 @@ public class FreeTypeFontGenerator implements Disposable {
 			}
 			ownsAtlas = true;
 			packer = new PixmapPacker(size, size, Format.RGBA8888, 1, false, packStrategy);
+
 		}
 
 		if (incremental) data.glyphs = new Array(charactersLength + 32);
@@ -465,8 +466,9 @@ public class FreeTypeFontGenerator implements Disposable {
 		}
 		Bitmap mainBitmap = mainGlyph.getBitmap();
 		Pixmap mainPixmap = mainBitmap.getPixmap(Format.RGBA8888, parameter.color, parameter.gamma);
-
-		if (mainBitmap.getWidth() != 0 && mainBitmap.getRows() != 0) {
+		int mainBitmapWidth = mainBitmap.getWidth();
+		int mainBitmapRows = mainBitmap.getRows();
+		if (mainBitmapWidth != 0 && mainBitmapRows != 0) {
 			int offsetX = 0, offsetY = 0;
 			if (parameter.borderWidth > 0) {
 				// execute stroker; this generates a glyph "extended" along the outline

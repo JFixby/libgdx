@@ -612,9 +612,11 @@ public class FreeType {
 			int rowBytes = Math.abs(getPitch()); // We currently ignore negative pitch.
 			if (color == Color.WHITE && pixelMode == FT_PIXEL_MODE_GRAY && rowBytes == width && gamma == 1) {
 				pixmap = new Pixmap(width, rows, Format.Alpha);
+//				attemptToFixPixmap(pixmap);
 				BufferUtils.copy(src, pixmap.getPixels(), pixmap.getPixels().capacity());
 			} else {
 				pixmap = new Pixmap(width, rows, Format.RGBA8888);
+//				attemptToFixPixmap(pixmap);
 				int rgba = Color.rgba8888(color);
 				byte[] srcRow = new byte[rowBytes];
 				int[] dstRow = new int[width];
@@ -651,6 +653,7 @@ public class FreeType {
 			}
 
 			Pixmap converted = pixmap;
+			pixmap.attemptToFixPixmap();
 			if (format != pixmap.getFormat()) {
 				converted = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), format);
 				Blending blending = Pixmap.getBlending();
@@ -662,6 +665,8 @@ public class FreeType {
 			return converted;
 		}
 		// @off
+
+		
 
 		public int getNumGray() {
 			return getNumGray(address);
@@ -679,6 +684,8 @@ public class FreeType {
 			return ((FT_Bitmap*)bitmap)->pixel_mode;
 		*/
 	}
+	
+	
 	
 	public static class GlyphMetrics extends Pointer {
 		GlyphMetrics (long address) {

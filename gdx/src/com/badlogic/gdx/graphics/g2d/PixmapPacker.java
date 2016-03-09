@@ -348,6 +348,7 @@ public class PixmapPacker implements Disposable {
 
 		public Page (PixmapPacker packer) {
 			image = new Pixmap(packer.pageWidth, packer.pageHeight, packer.pageFormat);
+			image.attemptToFixPixmap(Color.RED);
 		}
 
 		public Pixmap getPixmap () {

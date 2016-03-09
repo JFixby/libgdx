@@ -16,13 +16,13 @@
 
 package com.badlogic.gdx.graphics;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /** <p>
  * A Pixmap represents an image in memory. It has a width and height expressed in pixels as well as a {@link Format} specifying
@@ -69,11 +69,11 @@ public class Pixmap implements Disposable {
 			if (format == Gdx2DPixmap.GDX2D_FORMAT_RGBA8888) return RGBA8888;
 			throw new GdxRuntimeException("Unknown Gdx2DPixmap Format: " + format);
 		}
-		
+
 		public static int toGlFormat (Format format) {
 			return Gdx2DPixmap.toGlFormat(toGdx2DPixmapFormat(format));
 		}
-		
+
 		public static int toGlType (Format format) {
 			return Gdx2DPixmap.toGlType(toGdx2DPixmapFormat(format));
 		}
@@ -199,8 +199,8 @@ public class Pixmap implements Disposable {
 		pixmap.drawLine(x, y, x2, y2, color);
 	}
 
-	/** Draws a rectangle outline starting at x, y extending by width to the right and by height downwards (y-axis points downwards)
-	 * using the current color.
+	/** Draws a rectangle outline starting at x, y extending by width to the right and by height downwards (y-axis points
+	 * downwards) using the current color.
 	 * 
 	 * @param x The x coordinate
 	 * @param y The y coordinate
@@ -373,5 +373,19 @@ public class Pixmap implements Disposable {
 	/** @return the currently set {@link Blending} */
 	public static Blending getBlending () {
 		return blending;
+	}
+
+	public void attemptToFixPixmap () {
+		this.attemptToFixPixmap(Color.WHITE);
+	}
+
+	public void attemptToFixPixmap (Color red) {
+		Pixmap pixmap = this;
+		for (int x = 0; x < pixmap.getWidth(); x++) {
+			for (int y = 0; y < pixmap.getHeight(); y++) {
+				pixmap.drawPixel(x, y, red.toIntBits());
+
+			}
+		}
 	}
 }
