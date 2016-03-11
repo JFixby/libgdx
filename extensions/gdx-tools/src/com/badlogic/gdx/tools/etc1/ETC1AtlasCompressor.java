@@ -21,6 +21,7 @@ import java.io.File;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Page;
 import com.badlogic.gdx.utils.Array;
@@ -67,6 +68,7 @@ public class ETC1AtlasCompressor {
 			String newPageFileName = pageFileName + ".etc1";
 
 			collectAlphaInfo(pageFile, alphaInfo, newPageFileName);
+			removeAlpha(pageFile);
 
 // tell ETC1Compressor to process only related files, not the whole folder
 			compressTexture(atlasFolder, oldPageFileName, newPageFileName, transparentColor);
@@ -78,8 +80,9 @@ public class ETC1AtlasCompressor {
 			log("   to", compressedPageFile);
 
 			result.addCompressedTextureNames(oldPageFileName, newPageFileName);
-
-			pageFile.delete();
+			if (settings.deleteOriginalPNG()) {
+				pageFile.delete();
+			}
 
 		}
 
@@ -91,6 +94,22 @@ public class ETC1AtlasCompressor {
 		atlasFile.writeString(atlasData, false);
 
 		return result;
+	}
+
+	private static void removeAlpha (FileHandle pageFile) {
+		Pixmap pixmap = new Pixmap(pageFile);
+		int W = pixmap.getWidth();
+		int H = pixmap.getHeight();
+		for (int x = 0; x < W; x++) {
+			for (int y = 0; y < H; y++) {
+				int value = pixmap.getPixel(x, y);
+				value = value | 0x000000ff;
+				pixmap.drawPixel(x, y, value);
+			}
+		}
+		PixmapIO.writePNG(pageFile, pixmap);
+		pixmap.dispose();
+
 	}
 
 	private static void collectAlphaInfo (FileHandle pageFile, AlphaInfoContainer alphaInfo, String newPageFileName) {
@@ -108,6 +127,7 @@ public class ETC1AtlasCompressor {
 			}
 		}
 		alphaInfo.endFile(newPageFileName);
+		pixmap.dispose();
 	}
 
 	private static Color checkNullCollorSetDefault (Color color) {

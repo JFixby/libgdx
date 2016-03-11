@@ -4,6 +4,7 @@ package com.badlogic.gdx.tools.etc1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.zip.GZIPOutputStream;
 
 import com.badlogic.gdx.graphics.Color;
 
@@ -35,6 +36,20 @@ public class AlphaInfoContainer {
 			writePage(buffer, pages.get(i));
 		}
 		buffer.flush();
+		buffer.close();
+		byte[] bytes = buffer.toByteArray();
+		bytes = compressZIP(bytes);
+		return bytes;
+
+	}
+
+	private byte[] compressZIP (byte[] bytes) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		GZIPOutputStream zip = new GZIPOutputStream(buffer);
+		zip.write(bytes);
+		zip.flush();
+		zip.close();
+		buffer.close();
 		return buffer.toByteArray();
 	}
 

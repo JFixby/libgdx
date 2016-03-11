@@ -22,6 +22,7 @@ public class ETC1AtlasCompressorSettings {
 
 	private String atlasFilePathString;
 	private Color transparentColor;
+	private boolean deleteOriginalPNG = false;
 
 	public void setAtlasFilePathString (String atlasFilePathString) {
 		this.atlasFilePathString = atlasFilePathString;
@@ -39,5 +40,12 @@ public class ETC1AtlasCompressorSettings {
 		this.transparentColor = transparentColor;
 	}
 
+	public boolean deleteOriginalPNG () {
+		return deleteOriginalPNG;
+	}
+
+	public void setDeleteOriginalPNG (boolean deleteOriginalPNG) {
+		this.deleteOriginalPNG = deleteOriginalPNG;
+	}
 
 }

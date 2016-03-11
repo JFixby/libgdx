@@ -93,8 +93,8 @@ public class ETC1AtlasCompressorTest implements ApplicationListener {
 
 		TexturePacker.Settings atlasSettings = new TexturePacker.Settings();
 		atlasSettings.debug = !true;
-		atlasSettings.maxWidth = 512;
-		atlasSettings.maxHeight = 256;
+		atlasSettings.maxWidth = 1024;
+		atlasSettings.maxHeight = 1024;
 		atlasSettings.format = Format.RGBA8888;
 
 		TexturePacker.process(atlasSettings, pngInputDir, atlasOutputDir, outputAtlasFilename);

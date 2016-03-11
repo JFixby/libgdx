@@ -31,6 +31,7 @@ public class AlphaInfoPage {
 	}
 
 	public void writeTo (ByteArrayOutputStream buffer) throws IOException {
+		checkValid(newPageFileName);
 		ObjectOutputStream obj = new ObjectOutputStream(buffer);
 		obj.writeObject(newPageFileName);
 		obj.writeObject(bytes);
