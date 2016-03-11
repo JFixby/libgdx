@@ -20,6 +20,7 @@ import java.io.File;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Page;
 import com.badlogic.gdx.utils.Array;
@@ -47,6 +48,8 @@ public class ETC1AtlasCompressor {
 
 		TextureAtlas.TextureAtlasData data = new TextureAtlas.TextureAtlasData(atlasFile, atlasFolder, false);
 
+		AlphaInfoContainer alphaInfo = new AlphaInfoContainer();
+
 		Array<Page> pages = data.getPages();
 
 		String atlasData = atlasFile.readString();
@@ -54,6 +57,7 @@ public class ETC1AtlasCompressor {
 		Color transparentColor = settings.getTransparentColor();
 		transparentColor = checkNullCollorSetDefault(transparentColor);
 		result.setTransparentColor(transparentColor);
+		alphaInfo.setTransparentColor(transparentColor);
 		for (int i = 0; i < pages.size; i++) {
 			Page page_i = pages.get(i);
 			FileHandle pageFile = page_i.textureFile;
@@ -61,6 +65,9 @@ public class ETC1AtlasCompressor {
 			String oldPageFileName = pageFile.name();
 			String pageFileName = pageFile.nameWithoutExtension();
 			String newPageFileName = pageFileName + ".etc1";
+
+			collectAlphaInfo(pageFile, alphaInfo, newPageFileName);
+
 // tell ETC1Compressor to process only related files, not the whole folder
 			compressTexture(atlasFolder, oldPageFileName, newPageFileName, transparentColor);
 
@@ -76,9 +83,31 @@ public class ETC1AtlasCompressor {
 
 		}
 
+		byte[] alphaInfoBytes = alphaInfo.toByteArray();
+		String alphaInfoFileName = atlasFile.name() + ".alpha-info";
+		FileHandle alphaInfoFile = atlasFolder.child(alphaInfoFileName);
+		alphaInfoFile.writeBytes(alphaInfoBytes, false);
+
 		atlasFile.writeString(atlasData, false);
 
 		return result;
+	}
+
+	private static void collectAlphaInfo (FileHandle pageFile, AlphaInfoContainer alphaInfo, String newPageFileName) {
+		Pixmap pixmap = new Pixmap(pageFile);
+		int W = pixmap.getWidth();
+		int H = pixmap.getHeight();
+
+		alphaInfo.beginFile(newPageFileName, W, H);
+
+		for (int x = 0; x < W; x++) {
+			for (int y = 0; y < H; y++) {
+				int value = pixmap.getPixel(x, y);
+				int alpha = value & 0x000000ff;
+				alphaInfo.addAlphaValue(alpha);
+			}
+		}
+		alphaInfo.endFile(newPageFileName);
 	}
 
 	private static Color checkNullCollorSetDefault (Color color) {
