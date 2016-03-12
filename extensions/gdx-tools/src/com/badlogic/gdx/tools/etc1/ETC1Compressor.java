@@ -18,6 +18,11 @@ package com.badlogic.gdx.tools.etc1;
 
 import java.io.File;
 
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.glutils.ETC1;
+import com.badlogic.gdx.graphics.glutils.ETC1.ETC1Data;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 
 public class ETC1Compressor {
@@ -36,5 +41,23 @@ public class ETC1Compressor {
 			System.exit(-1);
 		}
 		ETC1Compressor.process(args[0], args[1], true, false);
+	}
+
+	public static void process (String inputFilePath, String outputFilePath) throws Exception {
+		GdxNativesLoader.load();
+		FileHandle inputFile = new FileHandle(inputFilePath);
+		FileHandle outputFile = new FileHandle(outputFilePath);
+		System.out.println("Processing " + inputFile);
+		Pixmap pixmap = new Pixmap(inputFile);
+		if (pixmap.getFormat() != Format.RGB888 && pixmap.getFormat() != Format.RGB565) {
+			System.out.println("Converting from " + pixmap.getFormat() + " to RGB888!");
+			Pixmap tmp = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Format.RGB888);
+			tmp.drawPixmap(pixmap, 0, 0, 0, 0, pixmap.getWidth(), pixmap.getHeight());
+			pixmap.dispose();
+			pixmap = tmp;
+		}
+		ETC1Data pkm = ETC1.encodeImagePKM(pixmap);
+		pkm.write(outputFile);
+		pixmap.dispose();
 	}
 }
