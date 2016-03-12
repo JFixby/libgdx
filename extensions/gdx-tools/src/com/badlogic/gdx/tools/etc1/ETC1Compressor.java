@@ -43,7 +43,7 @@ public class ETC1Compressor {
 		ETC1Compressor.process(args[0], args[1], true, false);
 	}
 
-	public static void process (String inputFilePath, String outputFilePath) throws Exception {
+	public static void compress (String inputFilePath, String outputFilePath) throws Exception {
 		GdxNativesLoader.load();
 		FileHandle inputFile = new FileHandle(inputFilePath);
 		FileHandle outputFile = new FileHandle(outputFilePath);
@@ -60,4 +60,6 @@ public class ETC1Compressor {
 		pkm.write(outputFile);
 		pixmap.dispose();
 	}
+
+	
 }
