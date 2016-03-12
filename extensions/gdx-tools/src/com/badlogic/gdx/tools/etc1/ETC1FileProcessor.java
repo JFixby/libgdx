@@ -18,7 +18,7 @@ public class ETC1FileProcessor extends FileProcessor {
 	protected void processFile (Entry entry) throws Exception {
 		String inputFilePath = entry.inputFile.getAbsolutePath();
 		String outputFilePath = entry.outputFile.getAbsolutePath();
-		ETC1Compressor.process(inputFilePath, outputFilePath);
+		ETC1Compressor.compress(inputFilePath, outputFilePath);
 	}
 
 	@Override
