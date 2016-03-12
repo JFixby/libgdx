@@ -21,6 +21,7 @@ import java.io.File;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.glutils.ETC1;
 import com.badlogic.gdx.graphics.glutils.ETC1.ETC1Data;
 import com.badlogic.gdx.utils.GdxNativesLoader;
@@ -61,5 +62,15 @@ public class ETC1Compressor {
 		pixmap.dispose();
 	}
 
-	
+	public static void deCompress (String etc1File, String restoredPngFile) {
+		GdxNativesLoader.load();
+		FileHandle inputFile = new FileHandle(etc1File);
+		FileHandle outputFile = new FileHandle(restoredPngFile);
+		System.out.println("Restoring " + inputFile);
+		ETC1Data etc1Data = new ETC1Data(inputFile);
+		Pixmap etc1Pixmap = ETC1.decodeImage(etc1Data, Format.RGB888);
+		PixmapIO.writePNG(outputFile, etc1Pixmap);
+
+	}
+
 }
