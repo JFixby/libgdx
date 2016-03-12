@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.badlogic.gdx.tools.etc1;
 
-import java.util.ArrayList;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 
-import com.badlogic.gdx.tools.FileProcessor;
+public class ETC1CompressorParams {
 
-public class ETC1FileProcessor extends FileProcessor {
-	ETC1FileProcessor () {
-		addInputSuffix(".png");
-		addInputSuffix(".jpg");
-		addInputSuffix(".jpeg");
-		addInputSuffix(".bmp");
-		setOutputSuffix(".etc1");
+	private Pixmap inputPixmap;
+	private Color transparentColor;
+
+	public ETC1CompressorParams () {
 	}
 
-	@Override
-	protected void processFile (Entry entry) throws Exception {
-		String inputFilePath = entry.inputFile.getAbsolutePath();
-		String outputFilePath = entry.outputFile.getAbsolutePath();
-		ETC1Compressor.compress(inputFilePath, outputFilePath);
+	public void setInputPixmap (Pixmap inputPixmap) {
+		this.inputPixmap = inputPixmap;
 	}
 
-	@Override
-	protected void processDir (Entry entryDir, ArrayList<Entry> value) throws Exception {
-		if (!entryDir.outputDir.exists()) {
-			if (!entryDir.outputDir.mkdirs()) throw new Exception("Couldn't create output directory '" + entryDir.outputDir + "'");
-		}
+	public Pixmap getInputPixmap () {
+		return inputPixmap;
 	}
+
+	public Color getTransparentColor () {
+		return transparentColor;
+	}
+
+	public void setTransparentColor (Color transparentColor) {
+		this.transparentColor = transparentColor;
+	}
+
 }

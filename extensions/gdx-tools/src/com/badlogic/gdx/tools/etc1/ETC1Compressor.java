@@ -19,6 +19,7 @@ package com.badlogic.gdx.tools.etc1;
 import java.io.File;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.PixmapIO;
@@ -27,6 +28,8 @@ import com.badlogic.gdx.graphics.glutils.ETC1.ETC1Data;
 import com.badlogic.gdx.utils.GdxNativesLoader;
 
 public class ETC1Compressor {
+	private static final Color FUXIA = new Color(1, 0, 1, 1);
+
 	public static void process (String inputDirectory, String outputDirectory, boolean recursive, boolean flatten)
 		throws Exception {
 		GdxNativesLoader.load();
@@ -45,22 +48,41 @@ public class ETC1Compressor {
 	}
 
 	public static void compress (String inputFilePath, String outputFilePath) throws Exception {
-		GdxNativesLoader.load();
+		ETC1CompressorParams params = new ETC1CompressorParams();
 		FileHandle inputFile = new FileHandle(inputFilePath);
 		FileHandle outputFile = new FileHandle(outputFilePath);
 		System.out.println("Processing " + inputFile);
+		GdxNativesLoader.load();
 		Pixmap pixmap = new Pixmap(inputFile);
-		if (pixmap.getFormat() != Format.RGB888 && pixmap.getFormat() != Format.RGB565) {
-			System.out.println("Converting from " + pixmap.getFormat() + " to RGB888!");
-			Pixmap tmp = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Format.RGB888);
-			tmp.drawPixmap(pixmap, 0, 0, 0, 0, pixmap.getWidth(), pixmap.getHeight());
-			pixmap.dispose();
-			pixmap = tmp;
-		}
-		ETC1Data pkm = ETC1.encodeImagePKM(pixmap);
-		pkm.write(outputFile);
+		params.setInputPixmap(pixmap);
+		ETC1CompressionResult result = compress(params);
 		pixmap.dispose();
+		ETC1Data etc1Data = result.getETC1Data();
+		System.out.println("Writing " + outputFile);
+		etc1Data.write(outputFile);
+		etc1Data.dispose();
 	}
+
+	public static ETC1CompressionResult compress (ETC1CompressorParams params) throws Exception {
+		ETC1CompressionResult result = new ETC1CompressionResult();
+		final Pixmap pixmap = params.getInputPixmap();
+		Color transparentColor = params.getTransparentColor();
+		if (transparentColor == null) {
+			transparentColor = FUXIA;
+		}
+		Pixmap tmp = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Format.RGB888);
+		tmp.setColor(FUXIA);
+		tmp.fill();
+		tmp.drawPixmap(pixmap, 0, 0, 0, 0, pixmap.getWidth(), pixmap.getHeight());
+
+		ETC1Data pkm = ETC1.encodeImagePKM(tmp);
+		result.setETC1Data(pkm);
+		tmp.dispose();
+
+		return result;
+	}
+
+
 
 	public static void deCompress (String etc1File, String restoredPngFile) {
 		GdxNativesLoader.load();

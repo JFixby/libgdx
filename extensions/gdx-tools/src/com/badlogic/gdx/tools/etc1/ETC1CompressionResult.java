@@ -16,30 +16,18 @@
 
 package com.badlogic.gdx.tools.etc1;
 
-import java.util.ArrayList;
+import com.badlogic.gdx.graphics.glutils.ETC1.ETC1Data;
 
-import com.badlogic.gdx.tools.FileProcessor;
+public class ETC1CompressionResult {
 
-public class ETC1FileProcessor extends FileProcessor {
-	ETC1FileProcessor () {
-		addInputSuffix(".png");
-		addInputSuffix(".jpg");
-		addInputSuffix(".jpeg");
-		addInputSuffix(".bmp");
-		setOutputSuffix(".etc1");
+	private ETC1Data pkm;
+
+	public ETC1Data getETC1Data () {
+		return pkm;
 	}
 
-	@Override
-	protected void processFile (Entry entry) throws Exception {
-		String inputFilePath = entry.inputFile.getAbsolutePath();
-		String outputFilePath = entry.outputFile.getAbsolutePath();
-		ETC1Compressor.compress(inputFilePath, outputFilePath);
+	public void setETC1Data (ETC1Data pkm) {
+		this.pkm = pkm;
 	}
 
-	@Override
-	protected void processDir (Entry entryDir, ArrayList<Entry> value) throws Exception {
-		if (!entryDir.outputDir.exists()) {
-			if (!entryDir.outputDir.mkdirs()) throw new Exception("Couldn't create output directory '" + entryDir.outputDir + "'");
-		}
-	}
 }
