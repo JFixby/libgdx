@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.badlogic.gdx.tools.etc1;
+
+import java.io.OutputStream;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -22,6 +25,7 @@ public class ETC1CompressorParams {
 
 	private Pixmap inputPixmap;
 	private Color transparentColor;
+	private OutputStream outputStream;
 
 	public ETC1CompressorParams () {
 	}
@@ -40,6 +44,14 @@ public class ETC1CompressorParams {
 
 	public void setTransparentColor (Color transparentColor) {
 		this.transparentColor = transparentColor;
+	}
+
+	public void setOutputStream (OutputStream outputStream) {
+		this.outputStream = outputStream;
+	}
+
+	public OutputStream getOutputStream () {
+		return outputStream;
 	}
 
 }

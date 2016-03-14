@@ -17,6 +17,7 @@
 package com.badlogic.gdx.tools.etc1;
 
 import java.io.File;
+import java.io.OutputStream;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -53,36 +54,40 @@ public class ETC1Compressor {
 		FileHandle outputFile = new FileHandle(outputFilePath);
 		System.out.println("Processing " + inputFile);
 		GdxNativesLoader.load();
+
 		Pixmap pixmap = new Pixmap(inputFile);
 		params.setInputPixmap(pixmap);
-		ETC1CompressionResult result = compress(params);
+
+		OutputStream fileStream = outputFile.write(false);
+		params.setOutputStream(fileStream);
+
+		ETC1Compressor.compress(params);
 		pixmap.dispose();
-		ETC1Data etc1Data = result.getETC1Data();
+
 		System.out.println("Writing " + outputFile);
-		etc1Data.write(outputFile);
-		etc1Data.dispose();
+		fileStream.close();
+
 	}
 
-	public static ETC1CompressionResult compress (ETC1CompressorParams params) throws Exception {
-		ETC1CompressionResult result = new ETC1CompressionResult();
+	public static void compress (ETC1CompressorParams params) throws Exception {
 		final Pixmap pixmap = params.getInputPixmap();
 		Color transparentColor = params.getTransparentColor();
+		OutputStream outputStream = params.getOutputStream();
 		if (transparentColor == null) {
 			transparentColor = FUXIA;
 		}
+		
 		Pixmap tmp = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Format.RGB888);
 		tmp.setColor(FUXIA);
 		tmp.fill();
 		tmp.drawPixmap(pixmap, 0, 0, 0, 0, pixmap.getWidth(), pixmap.getHeight());
-
 		ETC1Data pkm = ETC1.encodeImagePKM(tmp);
-		result.setETC1Data(pkm);
 		tmp.dispose();
-
-		return result;
+		
+		pkm.write(outputStream);
+		outputStream.flush();
+		pkm.dispose();
 	}
-
-
 
 	public static void deCompress (String etc1File, String restoredPngFile) {
 		GdxNativesLoader.load();
