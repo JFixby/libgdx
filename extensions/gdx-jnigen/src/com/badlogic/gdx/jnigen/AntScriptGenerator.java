@@ -21,14 +21,16 @@ import java.util.ArrayList;
 import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
 import com.badlogic.gdx.jnigen.FileDescriptor.FileType;
 
-/** Generates Ant scripts for multiple native build targets based on the given {@link BuildConfig}.</p>
+/** Generates Ant scripts for multiple native build targets based on the given {@link BuildConfig}.
+ * </p>
  * 
  * For each build target, an Ant build script is created that will compile C/C++ files to a shared library for a specific
  * platform. A master build script is generated that will execute the build scripts for each platform and bundles their shared
  * libraries into a Jar file containing all shared libraries for all desktop platform targets, and armeabi/ and armeabi-v7a/
  * folders containing the shard libraries for Android. The scripts can be executed from the command line or via the
  * {@link BuildExecutor}. The resulting shared libraries can be loaded with the {@link JniGenSharedLibraryLoader} which will load
- * the correct shared library from the natives jar/arm folders based on the platform the application is running on</p>
+ * the correct shared library from the natives jar/arm folders based on the platform the application is running on
+ * </p>
  * 
  * A common use case looks like this:
  * 
@@ -49,9 +51,11 @@ import com.badlogic.gdx.jnigen.FileDescriptor.FileType;
  * </pre>
  * 
  * This will create the build scripts and execute the build of the shared libraries for each platform, provided that the compilers
- * are available on the system. Mac OS X might have to be treated separately as there are no cross-compilers for it.</p>
+ * are available on the system. Mac OS X might have to be treated separately as there are no cross-compilers for it.
+ * </p>
  * 
- * The generator will also copy the necessary JNI headers to the jni/jni-headers folder for Windows, Linux and Mac OS X.</p>
+ * The generator will also copy the necessary JNI headers to the jni/jni-headers folder for Windows, Linux and Mac OS X.
+ * </p>
  * 
  * @author mzechner */
 public class AntScriptGenerator {
@@ -65,8 +69,7 @@ public class AntScriptGenerator {
 				throw new RuntimeException("Couldn't create directory for shared library files in '" + config.libsDir + "'");
 		}
 		if (!config.jniDir.exists()) {
-			if (!config.jniDir.mkdirs())
-				throw new RuntimeException("Couldn't create native code directory '" + config.jniDir + "'");
+			if (!config.jniDir.mkdirs()) throw new RuntimeException("Couldn't create native code directory '" + config.jniDir + "'");
 		}
 
 		// copy jni headers
@@ -74,8 +77,8 @@ public class AntScriptGenerator {
 
 		// copy memcpy_wrap.c, needed if your build platform uses the latest glibc, e.g. Ubuntu 12.10
 		if (config.jniDir.child("memcpy_wrap.c").exists() == false) {
-			new FileDescriptor("com/badlogic/gdx/jnigen/resources/scripts/memcpy_wrap.c", FileType.Classpath).copyTo(config.jniDir
-				.child("memcpy_wrap.c"));
+			new FileDescriptor("com/badlogic/gdx/jnigen/resources/scripts/memcpy_wrap.c", FileType.Classpath)
+				.copyTo(config.jniDir.child("memcpy_wrap.c"));
 		}
 
 		ArrayList<String> buildFiles = new ArrayList<String>();
@@ -105,7 +108,7 @@ public class AntScriptGenerator {
 				String sharedLibFilename = target.libName;
 				if (sharedLibFilename == null)
 					sharedLibFilename = getSharedLibFilename(target.os, target.is64Bit, config.sharedLibName);
-				
+
 				sharedLibFiles.add(sharedLibFilename);
 				if (target.os != TargetOs.Android && target.os != TargetOs.IOS) {
 					libsDirs.add("../" + libsDir.path().replace('\\', '/'));
@@ -116,9 +119,9 @@ public class AntScriptGenerator {
 		// generate the master build script
 		String template = new FileDescriptor("com/badlogic/gdx/jnigen/resources/scripts/build.xml.template", FileType.Classpath)
 			.readString();
-		StringBuffer clean = new StringBuffer();
-		StringBuffer compile = new StringBuffer();
-		StringBuffer pack = new StringBuffer();
+		StringBuilder clean = new StringBuilder();
+		StringBuilder compile = new StringBuilder();
+		StringBuilder pack = new StringBuilder();
 
 		for (int i = 0; i < buildFiles.size(); i++) {
 			clean.append("\t\t<ant antfile=\"" + buildFiles.get(i) + "\" target=\"clean\"/>\n");
@@ -137,8 +140,8 @@ public class AntScriptGenerator {
 		template = template.replace("%projectName%", config.sharedLibName + "-natives");
 		template = template.replace("<clean/>", clean.toString());
 		template = template.replace("<compile/>", compile.toString());
-		template = template.replace("%packFile%", "../" + config.libsDir.path().replace('\\', '/') + "/" + config.sharedLibName
-			+ "-natives.jar");
+		template = template.replace("%packFile%",
+			"../" + config.libsDir.path().replace('\\', '/') + "/" + config.sharedLibName + "-natives.jar");
 		template = template.replace("<pack/>", pack);
 
 		config.jniDir.child("build.xml").writeString(template, false);
@@ -151,8 +154,8 @@ public class AntScriptGenerator {
 			"mac/jni_md.h", "win32/jawt_md.h", "win32/jni_md.h"};
 
 		for (String file : files) {
-			new FileDescriptor(pack, FileType.Classpath).child(file).copyTo(
-				new FileDescriptor(jniDir).child("jni-headers").child(file));
+			new FileDescriptor(pack, FileType.Classpath).child(file)
+				.copyTo(new FileDescriptor(jniDir).child("jni-headers").child(file));
 		}
 	}
 
@@ -219,26 +222,26 @@ public class AntScriptGenerator {
 
 		// generate include and exclude fileset Ant description for C/C++
 		// append memcpy_wrap.c to list of files to be build
-		StringBuffer cIncludes = new StringBuffer();
+		StringBuilder cIncludes = new StringBuilder();
 		cIncludes.append("\t\t<include name=\"memcpy_wrap.c\"/>\n");
 		for (String cInclude : target.cIncludes) {
 			cIncludes.append("\t\t<include name=\"" + cInclude + "\"/>\n");
 		}
-		StringBuffer cppIncludes = new StringBuffer();
+		StringBuilder cppIncludes = new StringBuilder();
 		for (String cppInclude : target.cppIncludes) {
 			cppIncludes.append("\t\t<include name=\"" + cppInclude + "\"/>\n");
 		}
-		StringBuffer cExcludes = new StringBuffer();
+		StringBuilder cExcludes = new StringBuilder();
 		for (String cExclude : target.cExcludes) {
 			cExcludes.append("\t\t<exclude name=\"" + cExclude + "\"/>\n");
 		}
-		StringBuffer cppExcludes = new StringBuffer();
+		StringBuilder cppExcludes = new StringBuilder();
 		for (String cppExclude : target.cppExcludes) {
 			cppExcludes.append("\t\t<exclude name=\"" + cppExclude + "\"/>\n");
 		}
 
 		// generate C/C++ header directories
-		StringBuffer headerDirs = new StringBuffer();
+		StringBuilder headerDirs = new StringBuilder();
 		for (String headerDir : target.headerDirs) {
 			headerDirs.append("\t\t\t<arg value=\"-I" + headerDir + "\"/>\n");
 		}

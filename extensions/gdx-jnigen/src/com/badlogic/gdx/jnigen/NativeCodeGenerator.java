@@ -36,7 +36,8 @@ import com.badlogic.gdx.jnigen.parsing.RobustJavaMethodParser;
  * 
  * <h2>Augmenting Java Files with C/C++</h2> C/C++ code can be directly added to native methods in the Java file as block comments
  * starting at the same line as the method signature. Custom JNI code that is not associated with a native method can be added via
- * a special block comment as shown below.</p>
+ * a special block comment as shown below.
+ * </p>
  * 
  * All arguments can be accessed by the name specified in the Java native method signature (unless you use $ in your identifier
  * which is allowed in Java).
@@ -59,10 +60,12 @@ import com.badlogic.gdx.jnigen.parsing.RobustJavaMethodParser;
  * 
  * The generated header file is automatically included in the .cpp file. Methods and custom JNI code can be mixed throughout the
  * Java file, their order is preserved in the generated .cpp file. Method overloading is supported but not recommended as the
- * overloading detection is very basic.</p>
+ * overloading detection is very basic.
+ * </p>
  * 
  * If a native method has strings, one dimensional primitive arrays or direct {@link Buffer} instances as arguments, JNI setup and
- * cleanup code is automatically generated.</p>
+ * cleanup code is automatically generated.
+ * </p>
  * 
  * The following list gives the mapping from Java to C/C++ types for arguments:
  * 
@@ -166,7 +169,8 @@ import com.badlogic.gdx.jnigen.parsing.RobustJavaMethodParser;
  * </pre>
  * 
  * To automatically compile and load the native code, see the classes {@link AntScriptGenerator}, {@link BuildExecutor} and
- * {@link JniGenSharedLibraryLoader} classes. </p>
+ * {@link JniGenSharedLibraryLoader} classes.
+ * </p>
  * 
  * @author mzechner */
 public class NativeCodeGenerator {
@@ -294,7 +298,7 @@ public class NativeCodeGenerator {
 		}
 	}
 
-	protected void emitHeaderInclude (StringBuffer buffer, String fileName) {
+	protected void emitHeaderInclude (StringBuilder buffer, String fileName) {
 		buffer.append("#include <" + fileName + ">\n");
 	}
 
@@ -303,7 +307,7 @@ public class NativeCodeGenerator {
 		String headerFileContent = hFile.readString();
 		ArrayList<CMethod> cMethods = cMethodParser.parse(headerFileContent).getMethods();
 
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		emitHeaderInclude(buffer, hFile.name());
 
 		for (JavaSegment segment : javaSegments) {
@@ -317,9 +321,8 @@ public class NativeCodeGenerator {
 					throw new RuntimeException("Method '" + javaMethod.getName() + "' has no body");
 				}
 				CMethod cMethod = findCMethod(javaMethod, cMethods);
-				if (cMethod == null)
-					throw new RuntimeException("Couldn't find C method for Java method '" + javaMethod.getClassName() + "#"
-						+ javaMethod.getName() + "'");
+				if (cMethod == null) throw new RuntimeException(
+					"Couldn't find C method for Java method '" + javaMethod.getClassName() + "#" + javaMethod.getName() + "'");
 				emitJavaMethod(buffer, javaMethod, cMethod);
 			}
 		}
@@ -354,23 +357,23 @@ public class NativeCodeGenerator {
 		return null;
 	}
 
-	private void emitLineMarker (StringBuffer buffer, int line) {
+	private void emitLineMarker (StringBuilder buffer, int line) {
 		buffer.append("\n//@line:");
 		buffer.append(line);
 		buffer.append("\n");
 	}
 
-	private void emitJniSection (StringBuffer buffer, JniSection section) {
+	private void emitJniSection (StringBuilder buffer, JniSection section) {
 		emitLineMarker(buffer, section.getStartIndex());
 		buffer.append(section.getNativeCode().replace("\r", ""));
 	}
 
-	private void emitJavaMethod (StringBuffer buffer, JavaMethod javaMethod, CMethod cMethod) {
+	private void emitJavaMethod (StringBuilder buffer, JavaMethod javaMethod, CMethod cMethod) {
 		// get the setup and cleanup code for arrays, buffers and strings
-		StringBuffer jniSetupCode = new StringBuffer();
-		StringBuffer jniCleanupCode = new StringBuffer();
-		StringBuffer additionalArgs = new StringBuffer();
-		StringBuffer wrapperArgs = new StringBuffer();
+		StringBuilder jniSetupCode = new StringBuilder();
+		StringBuilder jniCleanupCode = new StringBuilder();
+		StringBuilder additionalArgs = new StringBuilder();
+		StringBuilder wrapperArgs = new StringBuilder();
 		emitJniSetupCode(jniSetupCode, javaMethod, additionalArgs, wrapperArgs);
 		emitJniCleanupCode(jniCleanupCode, javaMethod, cMethod);
 
@@ -429,7 +432,7 @@ public class NativeCodeGenerator {
 
 	}
 
-	protected void emitMethodBody (StringBuffer buffer, JavaMethod javaMethod) {
+	protected void emitMethodBody (StringBuilder buffer, JavaMethod javaMethod) {
 		// emit a line marker
 		emitLineMarker(buffer, javaMethod.getEndIndex());
 
@@ -438,11 +441,11 @@ public class NativeCodeGenerator {
 		buffer.append("\n");
 	}
 
-	private String emitMethodSignature (StringBuffer buffer, JavaMethod javaMethod, CMethod cMethod, String additionalArguments) {
+	private String emitMethodSignature (StringBuilder buffer, JavaMethod javaMethod, CMethod cMethod, String additionalArguments) {
 		return emitMethodSignature(buffer, javaMethod, cMethod, additionalArguments, true);
 	}
 
-	private String emitMethodSignature (StringBuffer buffer, JavaMethod javaMethod, CMethod cMethod, String additionalArguments,
+	private String emitMethodSignature (StringBuilder buffer, JavaMethod javaMethod, CMethod cMethod, String additionalArguments,
 		boolean appendPrefix) {
 		// emit head, consisting of JNIEXPORT,return type and method name
 		// if this is a wrapped method, prefix the method name
@@ -497,8 +500,8 @@ public class NativeCodeGenerator {
 		return wrappedMethodName;
 	}
 
-	private void emitJniSetupCode (StringBuffer buffer, JavaMethod javaMethod, StringBuffer additionalArgs,
-		StringBuffer wrapperArgs) {
+	private void emitJniSetupCode (StringBuilder buffer, JavaMethod javaMethod, StringBuilder additionalArgs,
+		StringBuilder wrapperArgs) {
 		// add environment and class/object as the two first arguments for
 		// wrapped method.
 		if (javaMethod.isStatic()) {
@@ -568,12 +571,12 @@ public class NativeCodeGenerator {
 		buffer.append("\n");
 	}
 
-	private void emitJniCleanupCode (StringBuffer buffer, JavaMethod javaMethod, CMethod cMethod) {
+	private void emitJniCleanupCode (StringBuilder buffer, JavaMethod javaMethod, CMethod cMethod) {
 		// emit cleanup code for arrays, must come first
 		for (Argument arg : javaMethod.getArguments()) {
 			if (arg.getType().isPrimitiveArray()) {
-				buffer.append("\tenv->ReleasePrimitiveArrayCritical(" + JNI_ARG_PREFIX + arg.getName() + ", " + arg.getName()
-					+ ", 0);\n");
+				buffer.append(
+					"\tenv->ReleasePrimitiveArrayCritical(" + JNI_ARG_PREFIX + arg.getName() + ", " + arg.getName() + ", 0);\n");
 			}
 		}
 

@@ -75,7 +75,7 @@ public class AssetManager implements Disposable {
 	AssetErrorListener listener = null;
 	int loaded = 0;
 	int toLoad = 0;
-        
+
 	final FileHandleResolver resolver;
 
 	Logger log = new Logger("AssetManager", Application.LOG_NONE);
@@ -115,8 +115,7 @@ public class AssetManager implements Disposable {
 		executor = new AsyncExecutor(1);
 	}
 
-	/** Returns the {@link FileHandleResolver} for which this AssetManager
-	 * was loaded with.
+	/** Returns the {@link FileHandleResolver} for which this AssetManager was loaded with.
 	 * @return the file handle resolver which this AssetManager uses */
 	public FileHandleResolver getFileHandleResolver () {
 		return resolver;
@@ -279,8 +278,8 @@ public class AssetManager implements Disposable {
 		return getLoader(type, null);
 	}
 
-	/** Returns the loader for the given type and the specified filename. If no loader exists for the specific filename, the default
-	 * loader for that type is returned.
+	/** Returns the loader for the given type and the specified filename. If no loader exists for the specific filename, the
+	 * default loader for that type is returned.
 	 * @param type The type of the loader to get
 	 * @param fileName The filename of the asset to get a loader for, or null to get the default loader
 	 * @return The loader capable of loading the type and filename, or null if none exists */
@@ -325,19 +324,17 @@ public class AssetManager implements Disposable {
 		// check preload queue
 		for (int i = 0; i < loadQueue.size; i++) {
 			AssetDescriptor desc = loadQueue.get(i);
-			if (desc.fileName.equals(fileName) && !desc.type.equals(type))
-				throw new GdxRuntimeException("Asset with name '" + fileName
-					+ "' already in preload queue, but has different type (expected: " + ClassReflection.getSimpleName(type)
-					+ ", found: " + ClassReflection.getSimpleName(desc.type) + ")");
+			if (desc.fileName.equals(fileName) && !desc.type.equals(type)) throw new GdxRuntimeException(
+				"Asset with name '" + fileName + "' already in preload queue, but has different type (expected: "
+					+ ClassReflection.getSimpleName(type) + ", found: " + ClassReflection.getSimpleName(desc.type) + ")");
 		}
 
 		// check task list
 		for (int i = 0; i < tasks.size(); i++) {
 			AssetDescriptor desc = tasks.get(i).assetDesc;
-			if (desc.fileName.equals(fileName) && !desc.type.equals(type))
-				throw new GdxRuntimeException("Asset with name '" + fileName
-					+ "' already in task list, but has different type (expected: " + ClassReflection.getSimpleName(type) + ", found: "
-					+ ClassReflection.getSimpleName(desc.type) + ")");
+			if (desc.fileName.equals(fileName) && !desc.type.equals(type)) throw new GdxRuntimeException(
+				"Asset with name '" + fileName + "' already in task list, but has different type (expected: "
+					+ ClassReflection.getSimpleName(type) + ", found: " + ClassReflection.getSimpleName(desc.type) + ")");
 		}
 
 		// check loaded assets
@@ -691,7 +688,7 @@ public class AssetManager implements Disposable {
 
 	/** @return a string containing ref count and dependency information for all assets. */
 	public synchronized String getDiagnostics () {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (String fileName : assetTypes.keys()) {
 			buffer.append(fileName);
 			buffer.append(", ");
