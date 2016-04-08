@@ -187,7 +187,7 @@ public class AndroidApplication extends Activity implements AndroidApplicationBa
 		useImmersiveMode(this.useImmersiveMode);
 		if (this.useImmersiveMode && getVersion() >= Build.VERSION_CODES.KITKAT) {
 			try {
-				Class<?> vlistener = Class.forName("com.badlogic.gdx.backends.android.AndroidVisibilityListener");
+				Class<?> vlistener = AndroidVisibilityListener.class;
 				Object o = vlistener.newInstance();
 				Method method = vlistener.getDeclaredMethod("createListener", AndroidApplicationBase.class);
 				method.invoke(o, this);
