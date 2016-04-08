@@ -1,23 +1,6 @@
 
 package com.badlogic.gdx.backends.android;
 
-import java.lang.reflect.Method;
-
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Audio;
-import com.badlogic.gdx.Files;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.LifecycleListener;
-import com.badlogic.gdx.Net;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Clipboard;
-import com.badlogic.gdx.utils.GdxNativesLoader;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.SnapshotArray;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -33,6 +16,25 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
+import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Audio;
+import com.badlogic.gdx.Files;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.LifecycleListener;
+import com.badlogic.gdx.Net;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Clipboard;
+import com.badlogic.gdx.utils.GdxNativesLoader;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.SnapshotArray;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /** Implementation of the {@link AndroidApplicationBase} that is based on the {@link Fragment} class. This class is similar in use
  * to the {@link AndroidApplication} class, which is based on an {@link Activity}.
@@ -61,8 +63,7 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 	protected boolean firstResume = true;
 	protected final Array<Runnable> runnables = new Array<Runnable>();
 	protected final Array<Runnable> executedRunnables = new Array<Runnable>();
-	protected final SnapshotArray<LifecycleListener> lifecycleListeners = new SnapshotArray<LifecycleListener>(
-		LifecycleListener.class);
+	protected final SnapshotArray<LifecycleListener> lifecycleListeners = new SnapshotArray<LifecycleListener>(LifecycleListener.class);
 	private final Array<AndroidEventListener> androidEventListeners = new Array<AndroidEventListener>();
 	protected int logLevel = LOG_INFO;
 
@@ -112,7 +113,7 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 	@Override
 	public void useImmersiveMode (boolean use) {
 		if (!use || getVersion() < Build.VERSION_CODES.KITKAT) return;
-
+		
 		try {
 			View view = this.graphics.getView();
 
@@ -156,8 +157,8 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 		if (this.getVersion() < MINIMUM_SDK) {
 			throw new GdxRuntimeException("LibGDX requires Android API Level " + MINIMUM_SDK + " or later.");
 		}
-		graphics = new AndroidGraphics(this, config,
-			config.resolutionStrategy == null ? new FillResolutionStrategy() : config.resolutionStrategy);
+		graphics = new AndroidGraphics(this, config, config.resolutionStrategy == null ? new FillResolutionStrategy()
+			: config.resolutionStrategy);
 		input = AndroidInputFactory.newAndroidInput(this, getActivity(), graphics.view, config);
 		audio = new AndroidAudio(getActivity(), config);
 		files = new AndroidFiles(getResources().getAssets(), getActivity().getFilesDir().getAbsolutePath());
@@ -194,7 +195,7 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 		useImmersiveMode(config.useImmersiveMode);
 		if (config.useImmersiveMode && getVersion() >= Build.VERSION_CODES.KITKAT) {
 			try {
-				Class<?> vlistener = AndroidVisibilityListener.class;
+				Class<?> vlistener = Class.forName("com.badlogic.gdx.backends.android.AndroidVisibilityListener");
 				Object o = vlistener.newInstance();
 				Method method = vlistener.getDeclaredMethod("createListener", AndroidApplicationBase.class);
 				method.invoke(o, this);
@@ -220,8 +221,7 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 		input.onPause();
 
 		// davebaol & mobidevelop:
-		// This fragment (or one of the parent) is currently being removed from its activity or the activity is in the process of
-		// finishing
+		// This fragment (or one of the parent)  is currently being removed from its activity or the activity is in the process of finishing
 		if (isRemoving() || isAnyParentFragmentRemoving() || getActivity().isFinishing()) {
 			graphics.clearManagedCaches();
 			graphics.destroy();
@@ -472,14 +472,17 @@ public class AndroidFragmentApplication extends Fragment implements AndroidAppli
 		return (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
 	}
 
-	/** Iterates over nested fragments hierarchy and returns true if one of the fragment is in the removal process
-	 *
-	 * @return true - one of the parent fragments is being removed */
-	private boolean isAnyParentFragmentRemoving () {
+	/**
+	* Iterates over nested fragments hierarchy and returns true if one of the fragment is in the removal process
+	*
+	* @return true - one of the parent fragments is being removed
+	*/
+	private boolean isAnyParentFragmentRemoving() {
 		Fragment fragment = getParentFragment();
 
-		while (fragment != null) {
-			if (fragment.isRemoving()) return true;
+		 while (fragment != null) {
+			if (fragment.isRemoving())
+				return true;
 
 			fragment = fragment.getParentFragment();
 		}

@@ -18,9 +18,9 @@ package com.badlogic.gdx.backends.android;
 
 import java.lang.reflect.Constructor;
 
-import com.badlogic.gdx.Application;
-
 import android.content.Context;
+
+import com.badlogic.gdx.Application;
 
 /** Class that instantiates AndroidInput or AndroidInputThreePlus depending on the SDK level, via reflection.
  * @author mzechner */
@@ -33,9 +33,9 @@ public class AndroidInputFactory {
 
 			int sdkVersion = android.os.Build.VERSION.SDK_INT;
 			if (sdkVersion >= 12) {
-				clazz = AndroidInputThreePlus.class;
+				clazz = Class.forName("com.badlogic.gdx.backends.android.AndroidInputThreePlus");
 			} else {
-				clazz = AndroidInput.class;
+				clazz = Class.forName("com.badlogic.gdx.backends.android.AndroidInput");
 			}
 			Constructor<?> constructor = clazz.getConstructor(Application.class, Context.class, Object.class,
 				AndroidApplicationConfiguration.class);
